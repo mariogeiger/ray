@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>glsl.frag</file>
+        <file>glsl.vert</file>
+        <file>skybox.jpeg</file>
+    </qresource>
+</RCC>
