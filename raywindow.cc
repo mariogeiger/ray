@@ -1,9 +1,9 @@
 #include "raywindow.hh"
 
 RayWindow::RayWindow()
+  : m_track(false)
+  , m_ks(0)
 {
-  m_ks = 0;
-  m_track = false;
 }
 
 void RayWindow::initializeGL()
@@ -215,7 +215,7 @@ void RayWindow::mouseMoveEvent(QMouseEvent* ev)
 
     if (!d.isNull()) {
       QMatrix4x4 rotation;
-      rotation.rotate(-0.1 * d.manhattanLength(), d.y(), d.x(), 0);
+      rotation.rotate(-0.01 * d.manhattanLength(), d.y(), d.x(), 0);
 
       m_view = m_view * rotation;
 
@@ -302,7 +302,7 @@ void RayWindow::keyReleaseEvent(QKeyEvent* ev)
 void RayWindow::timerEvent(QTimerEvent *)
 {
   double dt = m_ti.restart() / 1000.0;
-  double step = 4.0 * dt;
+  double step = 10.0 * dt;
   double angl = 30.0 * dt;
 
   QMatrix4x4 m;
