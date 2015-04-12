@@ -3,6 +3,7 @@
 
 GLWindow::GLWindow()
   : m_c(nullptr)
+  , m_pendingUpdate(false)
 {
   setSurfaceType(QWindow::OpenGLSurface);
 }

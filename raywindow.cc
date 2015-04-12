@@ -1,9 +1,9 @@
 #include "raywindow.hh"
 
 RayWindow::RayWindow()
+  : m_track(false)
+  , m_ks(0)
 {
-  m_ks = 0;
-  m_track = false;
 }
 
 RayWindow::~RayWindow()
@@ -287,6 +287,9 @@ void RayWindow::keyPressEvent(QKeyEvent* ev)
   case Qt::Key_E:
     m_ks |= KeyTurnRight;
     break;
+  case Qt::Key_Shift:
+    m_ks |= KeySpeedup;
+    break;
   default:
     break;
   }
@@ -325,6 +328,9 @@ void RayWindow::keyReleaseEvent(QKeyEvent* ev)
   case Qt::Key_E:
     m_ks &= ~KeyTurnRight;
     break;
+  case Qt::Key_Shift:
+    m_ks &= ~KeySpeedup;
+    break;
   default:
     break;
   }
@@ -339,8 +345,12 @@ void RayWindow::timerEvent(QTimerEvent *ev)
   }
 
   double dt = m_ti.restart() / 1000.0;
-  double step = 4.0 * dt;
+  double step = 5.0 * dt;
   double angl = 100.0 * dt;
+
+  if (m_ks & KeySpeedup) {
+    step *= 3.;
+  }
 
   QMatrix4x4 m;
   if (m_ks & KeyToward) {

@@ -53,7 +53,8 @@ private:
     KeyUp         = 0x40,
     KeyDown       = 0x80,
     KeyTurnLeft   = 0x100,
-    KeyTurnRight  = 0x200
+    KeyTurnRight  = 0x200,
+    KeySpeedup    = 0x400
   };
   int m_ks;
   QTime m_ti;

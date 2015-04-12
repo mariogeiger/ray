@@ -7,9 +7,8 @@
 QT       += core
 QT       += gui
 
-TARGET = ray
-CONFIG   += console
-CONFIG   -= app_bundle
+TARGET    = ray
+CONFIG   += app_bundle
 
 TEMPLATE = app
 
