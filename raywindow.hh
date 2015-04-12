@@ -5,21 +5,31 @@
 #include <QOpenGLShaderProgram>
 #include <QOpenGLTexture>
 #include <QMatrix4x4>
-#include <QOpenGLFunctions_3_0>
+#include <QOpenGLFunctions_2_0>
 #include <QTime>
+#include <QQuaternion>
 
-class RayWindow : public GLWindow, protected QOpenGLFunctions_3_0
+class RayWindow : public GLWindow
 {
 public:
   RayWindow();
+  ~RayWindow();
+
+  void setTrack(bool track);
 
 protected:
+  QOpenGLFunctions_2_0 OpenGL;
+
   void initializeGL();
   void paintGL();
   void resizeGL(int w, int h);
 
   void mousePressEvent(QMouseEvent* ev);
   void mouseMoveEvent(QMouseEvent* ev);
+
+  void moveEvent(QMoveEvent* ev);
+  void resizeEvent(QResizeEvent* ev);
+  void hideEvent(QHideEvent* ev);
 
   void keyPressEvent(QKeyEvent* ev);
   void keyReleaseEvent(QKeyEvent* ev);
@@ -29,6 +39,7 @@ private:
   QOpenGLShaderProgram* m_p;
   QOpenGLTexture* m_sky;
 
+  QQuaternion m_rot;
   QMatrix4x4 m_view;
   bool m_track;
 
