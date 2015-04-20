@@ -34,18 +34,11 @@ uniform vec3 light; // position de la lumire
 uniform sphere spheres[4];
 uniform plane planes[6];
 uniform samplerCube cubemap;
-uniform sampler2D tex;
+
 uniform mat4 view;
 out vec4 pixelColor;
 
-bool next_intersection(inout vec3 origin, in vec3 direction, out vec3 normal, out material mat, out vec2 texture);
-bool light_intersection(in vec3 origin, in vec3 direction, out vec3 normal, out material mat);
-
-void fresnel();
-
 const float fuzzy = 5e-4;
-
-#include MAIN
 
 // retourne la distance minimale strictement positive
 bool line_sphere_intersection(in vec3 origin, in vec3 direction, in sphere s, out float dist)
@@ -69,8 +62,9 @@ bool line_sphere_intersection(in vec3 origin, in vec3 direction, in sphere s, ou
 }
 
 // retourne la distance minimale strictement positive
-bool line_plane_intersection(in vec3 origin, in vec3 direction, in plane p, out float dist, out vec2 tx)
+bool line_plane_intersection(in vec3 origin, in vec3 direction, in plane p, out float dist)
 {
+	vec2 tx;
     vec3 h = cross(direction, p.height);
     float a = dot(p.width, h);
     if (a == 0.0) return false;
@@ -86,16 +80,13 @@ bool line_plane_intersection(in vec3 origin, in vec3 direction, in plane p, out 
     return true;
 }
 
-bool next_intersection(inout vec3 origin, in vec3 direction, out vec3 normal, out material mat, out vec2 texture)
+bool next_intersection(inout vec3 origin, in vec3 direction, out vec3 normal, out material mat)
 {
     float d;
     float dmin = 1e38;
 
     int ii = -1;
     for (int i = 0; i < 4; ++i) {
-        //if (spheres[i].radius == 0.0)
-        //break;
-
         if (line_sphere_intersection(origin, direction, spheres[i], d)) {
             if (d < dmin) {
                 dmin = d;
@@ -106,15 +97,10 @@ bool next_intersection(inout vec3 origin, in vec3 direction, out vec3 normal, ou
 
     int jj = -1;
     for (int j = 0; j < 6; ++j) {
-        //if (planes[j].mat.eta < 0.0)
-        //break;
-
-        vec2 tx;
-        if (line_plane_intersection(origin, direction, planes[j], d, tx)) {
+        if (line_plane_intersection(origin, direction, planes[j], d)) {
             if (d < dmin) {
                 dmin = d;
                 jj = j;
-                texture = tx;
             }
         }
     }
@@ -136,6 +122,8 @@ bool next_intersection(inout vec3 origin, in vec3 direction, out vec3 normal, ou
 
 bool light_intersection(in vec3 origin, in vec3 direction, out vec3 normal, out material mat)
 {
-    vec3 tmp = origin; vec2 tx;
-    return next_intersection(tmp, direction, normal, mat, tx);
+    vec3 tmp = origin;
+    return next_intersection(tmp, direction, normal, mat);
 }
+
+#include MAIN

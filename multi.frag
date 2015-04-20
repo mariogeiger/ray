@@ -15,20 +15,18 @@ void main(void)
     queue[0].origin = vec3(view[3]);
     queue[0].direction = normalize(first_ray);
 
-    for (int ray_count = 0; true; ++ray_count) {
-        float d = 0.0;
-
+    for (int ray_count = 0; ray_count < maxrays; ++ray_count) {
         // nothing to read
-        if (qread == qwrite) break;
+        if (qread == qwrite) {
+			break;
+		}
         ray r = queue[qread++]; qread = qread % qmax;
 
         // collision
         vec3 n;
-        vec2 tx;
         material m;
-        if (!next_intersection(r.origin, r.direction, n, m, tx)) {
+        if (!next_intersection(r.origin, r.direction, n, m)) {
             color += r.power * texture(cubemap, r.direction).rgb;
-            //color += r.power * r.direction;
             continue;
         }
 
@@ -60,47 +58,41 @@ void main(void)
 
         float pf = abs(m.phong_factor);
 
-        if (ray_count >= maxrays) {
-            //color += vec3(1,0,0);
-            break;
-        }
-
         // reflexion & transmission
         if (pf < 1.0) {
             vec3 t;
+            float R = 1.0;
+            ray s;
 
+			if ((qwrite+1)%qmax == qread)
+				continue;
+			
             if (m.eta > 0.0) {
-                float R = refraction(r.direction, n, cos, t, m.eta);
+                R = refraction(r.direction, n, cos, t, m.eta);
+			}
+			
+			if (R < 1.0) {
+				s = r;
+				s.power *= (1.0 - pf) * (1.0 - R);
+				if (s.power > minpower) {
+					s.origin += fuzzy * t;
+					s.direction = t;
+					queue[qwrite++] = s;
+					qwrite = qwrite % qmax;
+				}
+			}
 
-                //if ((qwrite+1)%qmax == qread) {
-                    //color += vec3(0,1,0);
-                //}
-                if (R < 1.0) {
-                    ray s = r;
-                    s.power *= (1.0 - pf) * (1 - R);
-                    s.origin += fuzzy * t;
-                    s.direction = t;
-                    if (s.power > minpower && (qwrite+1)%qmax != qread) {
-                        queue[qwrite++] = s; qwrite = qwrite % qmax;
-                    }
-                }
+			if ((qwrite+1)%qmax == qread)
+				continue;
 
-                ray s = r;
-                s.power *= (1.0 - pf) * R;
-                s.origin += fuzzy * i;
-                s.direction = i;
-                if (s.power > minpower && (qwrite+1)%qmax != qread) {
-                    queue[qwrite++] = s; qwrite = qwrite % qmax;
-                }
-            } else {
-                ray s = r;
-                s.power *= 1.0 - pf;
-                s.origin += fuzzy * i;
-                s.direction = i;
-                if (s.power > minpower && (qwrite+1)%qmax != qread) {
-                    queue[qwrite++] = s; qwrite = qwrite % qmax;
-                }
-            }
+			s = r;
+			s.power *= (1.0 - pf) * R;
+			if (s.power > minpower) {
+				s.origin += fuzzy * i;
+				s.direction = i;
+				queue[qwrite++] = s; 
+				qwrite = qwrite % qmax;
+			}
         }
     }
 

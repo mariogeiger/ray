@@ -46,7 +46,7 @@ void RayWindow::initializeGL()
     code = f.readAll();
   }
   {
-    QFile f(":/single.frag");
+    QFile f(":/multi.frag");
     f.open(QIODevice::ReadOnly);
     code.replace("#include MAIN", f.readAll());
   }
@@ -74,18 +74,18 @@ void RayWindow::initializeGL()
   // rouge
   m_p->setUniformValue("spheres[1].center", -1.5, 2.0, -5.5);
   m_p->setUniformValue("spheres[1].radius", 1.0f);
-  m_p->setUniformValue("spheres[1].mat.phong_factor", 1.f);
-  m_p->setUniformValue("spheres[1].mat.ambiant", 0.3, 0.0, 0.0);
-  m_p->setUniformValue("spheres[1].mat.diffuse", 0.9, 0.0, 0.0);
+  m_p->setUniformValue("spheres[1].mat.phong_factor", 1.0f);
+  m_p->setUniformValue("spheres[1].mat.ambiant", 0.5, 0.0, 0.0);
+  m_p->setUniformValue("spheres[1].mat.diffuse", 1.0, 0.0, 0.0);
   m_p->setUniformValue("spheres[1].mat.eta", 0.0f);
 
   // transparente
-  m_p->setUniformValue("spheres[2].center", 5.0, 0.0, -10);
-  m_p->setUniformValue("spheres[2].radius", 2.5f);
-  m_p->setUniformValue("spheres[2].mat.phong_factor", 0.0f);
-  m_p->setUniformValue("spheres[2].mat.ambiant", 0.0, 0.0, 0.0);
+  m_p->setUniformValue("spheres[2].center", 5.0, 0.0, -10.0);
+  m_p->setUniformValue("spheres[2].radius", 25.f);
+  m_p->setUniformValue("spheres[2].mat.phong_factor", 0.1f);
+  m_p->setUniformValue("spheres[2].mat.ambiant", 1.0, 1.0, 1.0);
   m_p->setUniformValue("spheres[2].mat.diffuse", 0.0, 0.0, 0.0);
-  m_p->setUniformValue("spheres[2].mat.eta", 1.5f);
+  m_p->setUniformValue("spheres[2].mat.eta", 0.0f);
 
   // transparente
   m_p->setUniformValue("spheres[3].center", -2.5, -1.5, -20);
