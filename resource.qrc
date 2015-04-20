@@ -3,5 +3,6 @@
         <file>glsl.frag</file>
         <file>glsl.vert</file>
         <file>skybox.jpeg</file>
+        <file>glsl2.frag</file>
     </qresource>
 </RCC>

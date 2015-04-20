@@ -24,9 +24,5 @@ HEADERS += \
     glwindow.hh \
     raywindow.hh
 
-OTHER_FILES += \
-    glsl.vert \
-    glsl.frag
-
 RESOURCES += \
     resource.qrc

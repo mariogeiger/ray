@@ -38,7 +38,7 @@ uniform sampler2D tex;
 uniform mat4 view;
 out vec4 pixelColor;
 
-bool refraction(in vec3 v, in vec3 n, in float cos, out vec3 t, in float eta);
+float refraction(in vec3 v, in vec3 n, in float cosi, out vec3 t, in float eta);
 
 bool next_intersection(inout vec3 origin, in vec3 direction, out vec3 normal, out material mat, out vec2 texture);
 bool light_intersection(in vec3 origin, in vec3 direction, out vec3 normal, out material mat);
@@ -47,19 +47,27 @@ void fresnel();
 
 const float fuzzy = 5e-4;
 
-const int maxrays = 10;
+const int maxrays = 20;
+const int qmax = 10;
+ray queue[qmax];
 
 void main(void)
 {
     vec3 color = vec3(0.0, 0.0, 0.0);
 
-    ray r;
-    r.power = 1.0;
-    r.origin = vec3(view[3]);
-    r.direction = normalize(first_ray);
+    int qread = 0;
+    int qwrite = 1;
+
+    queue[0].power = 1.0;
+    queue[0].origin = vec3(view[3]);
+    queue[0].direction = normalize(first_ray);
 
     for (int ray_count = 0; true; ++ray_count) {
         float d = 0.0;
+
+        // nothing to read
+        if (qread == qwrite) break;
+        ray r = queue[qread++]; qread = qread % qmax;
 
         // collision
         vec3 n;
@@ -71,8 +79,8 @@ void main(void)
             break;
         }
 
-        float cos = dot(r.direction, n);
-        vec3 i = r.direction - 2.0 * cos * n;
+        float cos = -dot(r.direction, n); // cos(theta_incident)
+        vec3 i = r.direction + 2.0 * cos * n; // reflexion
 
         // phong
         if (m.phong_factor > 0.0) {
@@ -90,58 +98,77 @@ void main(void)
             }
 
             if (lfactor > 0.0) { // if we are not in the shadow
-                dfactor = max(cos > 0.0 ? -dot(light, n) : dot(light, n), 0.0);
+                dfactor = max(cos < 0.0 ? -dot(light, n) : dot(light, n), 0.0);
                 sfactor = pow(max(dot(light, i), 0.0), 4.0);
             }
 
             color += r.power * m.phong_factor * (m.ambiant + lfactor * (dfactor * m.diffuse + sfactor * vec3(1.0, 1.0, 1.0)));
         }
 
-        // texture
         float pf = abs(m.phong_factor);
-        /*if (m.phong_factor < 0.0) {
-            //color += r.power * pf * texture(tex, tx).rgb;
-            color += r.power * pf * vec3(0, 1, 0);
-        }*/
 
         // reflexion & transmission
         if (pf < 1.0 && ray_count < maxrays) {
             vec3 t;
 
-            if (m.eta > 0.0 && refraction(r.direction, n, cos, t, m.eta)) {
-                r.power *= 1.0 - pf;
-                r.origin += fuzzy * t;
-                r.direction = t;
+            if (m.eta > 0.0) {
+                float R = refraction(r.direction, n, cos, t, m.eta);
+
+                if (R < 1.0) {
+                    r.power *= (1.0 - pf) * (1 - R);
+                    r.origin += fuzzy * t;
+                    r.direction = t;
+                    if (qwrite != qread) {
+                        queue[qwrite++] = r; qwrite = qwrite % qmax;
+                    }
+                }
+
+                r.power *= (1.0 - pf) * R;
+                r.origin += fuzzy * i;
+                r.direction = i;
+                if (qwrite != qread) {
+                    queue[qwrite++] = r; qwrite = qwrite % qmax;
+                }
             } else {
                 r.power *= 1.0 - pf;
                 r.origin += fuzzy * i;
                 r.direction = i;
+                if (qwrite != qread) {
+                    queue[qwrite++] = r; qwrite = qwrite % qmax;
+                }
             }
-        } else {
-            break;
         }
     }
 
     pixelColor = vec4(color, 1.0);
 }
 
-bool refraction(in vec3 v, in vec3 n, in float cos, out vec3 t, in float eta)
+float refraction(in vec3 v, in vec3 n, in float cosi, out vec3 t, in float eta)
 {
-    // cos = dot(v,n)
-    if (cos < 0.0) {
-        //        t = refract(v, n, 1.0 / eta);
-        float k = 1.0 - (1.0 - cos * cos) / eta / eta;
-        if (k < 0.0)
-            return false;
-        t = v / eta - (cos / eta + sqrt(k)) * n;
-    } else {
-        //        t = refract(v, -n, eta);
-        float k = 1.0 - eta * eta * (1.0 - cos * cos); // -a * -a = a * a
-        if (k < 0.0)
-            return false;
-        t = eta * v + (-eta * cos + sqrt(k)) * n; // -n
+    if (cosi < 0.0) {
+        //return refraction(v, -n, -cosi, t, 1./eta);
+        n = -n;
+        cosi = -cosi;
+        eta = 1.0/eta;
     }
-    return true;
+    // dot(v,n)<0 and eta=n2/n1 where v goes from n1 to n2
+
+    // return the power of reflection
+
+    // sin(ti) = eta sin(tt)
+    float cost2 = 1. - (1. - cosi*cosi) / (eta*eta);
+    if (cost2 <= 0.0) {
+        // T.I.R.
+        return 1.;
+    }
+    float cost = sqrt(cost2);
+
+    float rs = (cosi - eta*cost) / (cosi + eta*cost);
+    float rp = (eta*cosi - cost) / (eta*cosi + cost);
+
+    t = v / eta - (cost - cosi/eta) * n;
+
+    return (rs*rs + rp*rp) / 2.0;
 }
 
 // retourne la distance minimale strictement positive

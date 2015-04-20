@@ -38,7 +38,7 @@ void RayWindow::initializeGL()
 
   m_p = new QOpenGLShaderProgram(this);
   m_p->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/glsl.vert");
-  m_p->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/glsl.frag");
+  m_p->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/glsl2.frag");
   m_p->bindAttributeLocation("vertex", 0);
   m_p->link();
 
