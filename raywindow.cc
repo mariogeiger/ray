@@ -5,6 +5,7 @@ RayWindow::RayWindow()
   , m_ks(0)
 {
   resize(300, 300);
+  m_anglevalue = 1.428f;
 }
 
 RayWindow::~RayWindow()
@@ -45,7 +46,7 @@ void RayWindow::initializeGL()
 
   m_p->bind();
 
-  m_p->setUniformValue("anglevalue", 1.428f);
+  m_p->setUniformValue("anglevalue", m_anglevalue);
   m_p->setUniformValue("light", -0.3/1.0863, 1.0/1.0863, 0.3/1.0863);
   m_p->setUniformValue("light", 0.5773502691896258, 0.5773502691896258, 0.5773502691896258);
 
@@ -82,7 +83,7 @@ void RayWindow::initializeGL()
   m_p->setUniformValue("spheres[3].mat.eta", 1.f/1.5f);
 
   // cube
-  GLfloat etacube = 1.f/1.5f;
+  GLfloat etacube = 1.5f;
   m_p->setUniformValue("planes[0].point", 0.0, -2.5, -8.0);
   m_p->setUniformValue("planes[0].normal", 1.0, 0.0, 0.0);
   m_p->setUniformValue("planes[0].width", 0.0, 0.0, -5.0);
@@ -227,10 +228,21 @@ void RayWindow::mouseMoveEvent(QMouseEvent* ev)
     QPointF d = ev->windowPos() - middle;
 
     if (!d.isNull()) {
-      m_rot *= QQuaternion::fromAxisAndAngle(d.y(), d.x(), 0, -0.1 * d.manhattanLength());
+      m_rot *= QQuaternion::fromAxisAndAngle(d.y(), d.x(), 0, -0.05 * std::min(std::pow(d.manhattanLength(), 2.0), 10.0));
       cursor().setPos(mapToGlobal(middle));
     }
   }
+}
+
+#include <QWheelEvent>
+void RayWindow::wheelEvent(QWheelEvent* ev)
+{
+  m_anglevalue *= std::pow(1.001f, ev->angleDelta().y());
+
+  m_p->bind();
+  m_p->setUniformValue("anglevalue", m_anglevalue);
+  m_p->release();
+  updateGL();
 }
 
 void RayWindow::moveEvent(QMoveEvent* ev)

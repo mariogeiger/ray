@@ -27,6 +27,8 @@ protected:
   void mousePressEvent(QMouseEvent* ev);
   void mouseMoveEvent(QMouseEvent* ev);
 
+  void wheelEvent(QWheelEvent* ev);
+
   void moveEvent(QMoveEvent* ev);
   void resizeEvent(QResizeEvent* ev);
   void hideEvent(QHideEvent* ev);
@@ -58,6 +60,8 @@ private:
   };
   int m_ks;
   QTime m_ti;
+
+  GLfloat m_anglevalue;
 };
 
 #endif // RAYWINDOW_HH
