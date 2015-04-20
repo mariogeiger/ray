@@ -4,6 +4,7 @@ RayWindow::RayWindow()
   : m_track(false)
   , m_ks(0)
 {
+  resize(300, 300);
 }
 
 RayWindow::~RayWindow()
@@ -81,6 +82,7 @@ void RayWindow::initializeGL()
   m_p->setUniformValue("spheres[3].mat.eta", 1.f/1.5f);
 
   // cube
+  GLfloat etacube = 1.f/1.5f;
   m_p->setUniformValue("planes[0].point", 0.0, -2.5, -8.0);
   m_p->setUniformValue("planes[0].normal", 1.0, 0.0, 0.0);
   m_p->setUniformValue("planes[0].width", 0.0, 0.0, -5.0);
@@ -88,7 +90,7 @@ void RayWindow::initializeGL()
   m_p->setUniformValue("planes[0].mat.phong_factor", 0.0f);
   m_p->setUniformValue("planes[0].mat.ambiant", 0.5, 0.0, 0.0);
   m_p->setUniformValue("planes[0].mat.diffuse", 1.0, 0.0, 0.0);
-  m_p->setUniformValue("planes[0].mat.eta", 1.3f);
+  m_p->setUniformValue("planes[0].mat.eta", etacube);
 
   m_p->setUniformValue("planes[1].point", -5.0, -2.5, -8.0);
   m_p->setUniformValue("planes[1].normal", 0.0, 0.0, 1.0);
@@ -97,7 +99,7 @@ void RayWindow::initializeGL()
   m_p->setUniformValue("planes[1].mat.phong_factor", 0.0f);
   m_p->setUniformValue("planes[1].mat.ambiant", 0.5, 0.0, 0.0);
   m_p->setUniformValue("planes[1].mat.diffuse", 1.0, 0.0, 0.0);
-  m_p->setUniformValue("planes[1].mat.eta", 1.3f);
+  m_p->setUniformValue("planes[1].mat.eta", etacube);
 
   m_p->setUniformValue("planes[2].point", -5.0, 2.5, -8.0);
   m_p->setUniformValue("planes[2].normal", 0.0, 1.0, 0.0);
@@ -106,7 +108,7 @@ void RayWindow::initializeGL()
   m_p->setUniformValue("planes[2].mat.phong_factor", 0.0f);
   m_p->setUniformValue("planes[2].mat.ambiant", 0.5, 0.0, 0.0);
   m_p->setUniformValue("planes[2].mat.diffuse", 1.0, 0.0, 0.0);
-  m_p->setUniformValue("planes[2].mat.eta", 1.3f);
+  m_p->setUniformValue("planes[2].mat.eta", etacube);
 
   m_p->setUniformValue("planes[3].point", -5.0, -2.5, -8.0);
   m_p->setUniformValue("planes[3].normal", 0.0, -1.0, 0.0);
@@ -115,7 +117,7 @@ void RayWindow::initializeGL()
   m_p->setUniformValue("planes[3].mat.phong_factor", 0.0f);
   m_p->setUniformValue("planes[3].mat.ambiant", 0.5, 0.0, 0.0);
   m_p->setUniformValue("planes[3].mat.diffuse", 1.0, 0.0, 0.0);
-  m_p->setUniformValue("planes[3].mat.eta", 1.3f);
+  m_p->setUniformValue("planes[3].mat.eta", etacube);
 
   m_p->setUniformValue("planes[4].point", -5.0, -2.5, -8.0);
   m_p->setUniformValue("planes[4].normal", -1.0, 0.0, 0.0);
@@ -124,7 +126,7 @@ void RayWindow::initializeGL()
   m_p->setUniformValue("planes[4].mat.phong_factor", 0.0f);
   m_p->setUniformValue("planes[4].mat.ambiant", 0.5, 0.0, 0.0);
   m_p->setUniformValue("planes[4].mat.diffuse", 1.0, 0.0, 0.0);
-  m_p->setUniformValue("planes[4].mat.eta", 1.3f);
+  m_p->setUniformValue("planes[4].mat.eta", etacube);
 
   m_p->setUniformValue("planes[5].point", -5.0, -2.5, -13.0);
   m_p->setUniformValue("planes[5].normal", 0.0, 0.0, -1.0);
@@ -133,29 +135,30 @@ void RayWindow::initializeGL()
   m_p->setUniformValue("planes[5].mat.phong_factor", 0.0f);
   m_p->setUniformValue("planes[5].mat.ambiant", 0.5, 0.0, 0.0);
   m_p->setUniformValue("planes[5].mat.diffuse", 1.0, 0.0, 0.0);
-  m_p->setUniformValue("planes[5].mat.eta", 1.3f);
+  m_p->setUniformValue("planes[5].mat.eta", etacube);
 
   m_p->setUniformValue("tex", 1);
   m_p->release();
 
+  // sky cubemap texture
+  QImage sky = QImage(":/skybox.jpeg");
+  sky = sky.convertToFormat(QImage::Format_RGB888);
+  int a = sky.width() / 4;
 
   m_sky = new QOpenGLTexture(QOpenGLTexture::TargetCubeMap);
   m_sky->create();
-  QImage sky(":/skybox.jpeg");
-  sky = sky.convertToFormat(QImage::Format_RGBA8888);
-  int a = sky.width() / 4;
 
   m_sky->setSize(a, a);
   m_sky->setFormat(QOpenGLTexture::RGB32F);
   m_sky->allocateStorage();
 
-  QOpenGLTexture::PixelFormat format = QOpenGLTexture::RGBA;
+  QOpenGLTexture::PixelFormat format = QOpenGLTexture::RGB;
   QOpenGLTexture::PixelType type = QOpenGLTexture::UInt8;
 
   m_sky->setData(0, 0, QOpenGLTexture::CubeMapPositiveX, format, type,
                  sky.copy(0,   a, a, a).constBits());
   m_sky->setData(0, 0, QOpenGLTexture::CubeMapNegativeX, format, type,
-               sky.copy(2*a, a, a, a).constBits());
+                 sky.copy(2*a, a, a, a).constBits());
 
   m_sky->setData(0, 0, QOpenGLTexture::CubeMapPositiveY, format, type,
                  sky.copy(a, 0,   a, a).mirrored(true, true).constBits());
@@ -163,19 +166,14 @@ void RayWindow::initializeGL()
                  sky.copy(a, 2*a, a, a).mirrored(true, true).constBits());
 
   m_sky->setData(0, 0, QOpenGLTexture::CubeMapPositiveZ, format, type,
-               sky.copy(3*a, a, a, a).constBits());
+                 sky.copy(3*a, a, a, a).constBits());
   m_sky->setData(0, 0, QOpenGLTexture::CubeMapNegativeZ, format, type,
-               sky.copy(a,   a, a, a).constBits());
-//  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_REPEAT);
-//  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_REPEAT);
-//  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_REPEAT);
+                 sky.copy(a,   a, a, a).constBits());
 
-//  m_t->setWrapMode(QOpenGLTexture::DirectionS, QOpenGLTexture::ClampToEdge);
-//  m_t->setWrapMode(QOpenGLTexture::DirectionR, QOpenGLTexture::ClampToEdge);
-//  m_t->setWrapMode(QOpenGLTexture::DirectionT, QOpenGLTexture::ClampToEdge);
+  m_sky->setWrapMode(QOpenGLTexture::DirectionS, QOpenGLTexture::MirroredRepeat);
+  m_sky->setWrapMode(QOpenGLTexture::DirectionT, QOpenGLTexture::MirroredRepeat);
 
-//  m_sky->setMinificationFilter(QOpenGLTexture::Linear);
-//  m_sky->setMagnificationFilter(QOpenGLTexture::Linear);
+  m_sky->setMinMagFilters(QOpenGLTexture::Linear, QOpenGLTexture::Linear);
 }
 
 void RayWindow::paintGL()
@@ -259,39 +257,39 @@ void RayWindow::keyPressEvent(QKeyEvent* ev)
   if (!m_track) return;
 
   switch (ev->key()) {
-  case Qt::Key_W:
-  case Qt::Key_Up:
-    m_ks |= KeyToward;
-    break;
-  case Qt::Key_S:
-  case Qt::Key_Down:
-    m_ks |= KeyBackward;
-    break;
-  case Qt::Key_A:
-  case Qt::Key_Left:
-    m_ks |= KeyLeft;
-    break;
-  case Qt::Key_D:
-  case Qt::Key_Right:
-    m_ks |= KeyRight;
-    break;
-  case Qt::Key_R:
-    m_ks |= KeyUp;
-    break;
-  case Qt::Key_F:
-    m_ks |= KeyDown;
-    break;
-  case Qt::Key_Q:
-    m_ks |= KeyTurnLeft;
-    break;
-  case Qt::Key_E:
-    m_ks |= KeyTurnRight;
-    break;
-  case Qt::Key_Shift:
-    m_ks |= KeySpeedup;
-    break;
-  default:
-    break;
+    case Qt::Key_W:
+    case Qt::Key_Up:
+      m_ks |= KeyToward;
+      break;
+    case Qt::Key_S:
+    case Qt::Key_Down:
+      m_ks |= KeyBackward;
+      break;
+    case Qt::Key_A:
+    case Qt::Key_Left:
+      m_ks |= KeyLeft;
+      break;
+    case Qt::Key_D:
+    case Qt::Key_Right:
+      m_ks |= KeyRight;
+      break;
+    case Qt::Key_R:
+      m_ks |= KeyUp;
+      break;
+    case Qt::Key_F:
+      m_ks |= KeyDown;
+      break;
+    case Qt::Key_Q:
+      m_ks |= KeyTurnLeft;
+      break;
+    case Qt::Key_E:
+      m_ks |= KeyTurnRight;
+      break;
+    case Qt::Key_Shift:
+      m_ks |= KeySpeedup;
+      break;
+    default:
+      break;
   }
 }
 
@@ -300,39 +298,39 @@ void RayWindow::keyReleaseEvent(QKeyEvent* ev)
   if (!m_track) return;
 
   switch (ev->key()) {
-  case Qt::Key_W:
-  case Qt::Key_Up:
-    m_ks &= ~KeyToward;
-    break;
-  case Qt::Key_S:
-  case Qt::Key_Down:
-    m_ks &= ~KeyBackward;
-    break;
-  case Qt::Key_A:
-  case Qt::Key_Left:
-    m_ks &= ~KeyLeft;
-    break;
-  case Qt::Key_D:
-  case Qt::Key_Right:
-    m_ks &= ~KeyRight;
-    break;
-  case Qt::Key_R:
-    m_ks &= ~KeyUp;
-    break;
-  case Qt::Key_F:
-    m_ks &= ~KeyDown;
-    break;
-  case Qt::Key_Q:
-    m_ks &= ~KeyTurnLeft;
-    break;
-  case Qt::Key_E:
-    m_ks &= ~KeyTurnRight;
-    break;
-  case Qt::Key_Shift:
-    m_ks &= ~KeySpeedup;
-    break;
-  default:
-    break;
+    case Qt::Key_W:
+    case Qt::Key_Up:
+      m_ks &= ~KeyToward;
+      break;
+    case Qt::Key_S:
+    case Qt::Key_Down:
+      m_ks &= ~KeyBackward;
+      break;
+    case Qt::Key_A:
+    case Qt::Key_Left:
+      m_ks &= ~KeyLeft;
+      break;
+    case Qt::Key_D:
+    case Qt::Key_Right:
+      m_ks &= ~KeyRight;
+      break;
+    case Qt::Key_R:
+      m_ks &= ~KeyUp;
+      break;
+    case Qt::Key_F:
+      m_ks &= ~KeyDown;
+      break;
+    case Qt::Key_Q:
+      m_ks &= ~KeyTurnLeft;
+      break;
+    case Qt::Key_E:
+      m_ks &= ~KeyTurnRight;
+      break;
+    case Qt::Key_Shift:
+      m_ks &= ~KeySpeedup;
+      break;
+    default:
+      break;
   }
 }
 
