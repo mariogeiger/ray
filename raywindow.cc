@@ -1,4 +1,5 @@
 #include "raywindow.hh"
+#include <QFile>
 
 RayWindow::RayWindow()
   : m_track(false)
@@ -38,9 +39,21 @@ void RayWindow::initializeGL()
 {
   OpenGL.initializeOpenGLFunctions();
 
+  QByteArray code;
+  {
+    QFile f(":/glsl.frag");
+    f.open(QIODevice::ReadOnly);
+    code = f.readAll();
+  }
+  {
+    QFile f(":/single.frag");
+    f.open(QIODevice::ReadOnly);
+    code.replace("#include MAIN", f.readAll());
+  }
+
   m_p = new QOpenGLShaderProgram(this);
   m_p->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/glsl.vert");
-  m_p->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/glsl2.frag");
+  m_p->addShaderFromSourceCode(QOpenGLShader::Fragment, code);
   m_p->bindAttributeLocation("vertex", 0);
   m_p->link();
 
