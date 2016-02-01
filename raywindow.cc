@@ -82,10 +82,10 @@ void RayWindow::initializeGL()
   // transparente
   m_p->setUniformValue("spheres[2].center", 5.0, 0.0, -10.0);
   m_p->setUniformValue("spheres[2].radius", 25.f);
-  m_p->setUniformValue("spheres[2].mat.phong_factor", 0.1f);
+  m_p->setUniformValue("spheres[2].mat.phong_factor", 0.0f);
   m_p->setUniformValue("spheres[2].mat.ambiant", 1.0, 1.0, 1.0);
   m_p->setUniformValue("spheres[2].mat.diffuse", 0.0, 0.0, 0.0);
-  m_p->setUniformValue("spheres[2].mat.eta", 0.0f);
+  m_p->setUniformValue("spheres[2].mat.eta", 0.95f);
 
   // transparente
   m_p->setUniformValue("spheres[3].center", -2.5, -1.5, -20);
@@ -96,7 +96,7 @@ void RayWindow::initializeGL()
   m_p->setUniformValue("spheres[3].mat.eta", 1.f/1.5f);
 
   // cube
-  GLfloat etacube = 1.5f;
+  GLfloat etacube = 0.9f;
   m_p->setUniformValue("planes[0].point", 0.0, -2.5, -8.0);
   m_p->setUniformValue("planes[0].normal", 1.0, 0.0, 0.0);
   m_p->setUniformValue("planes[0].width", 0.0, 0.0, -5.0);

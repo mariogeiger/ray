@@ -9,6 +9,7 @@ QT       += gui
 
 TARGET    = ray
 CONFIG   += app_bundle
+CONFIG   += c++11
 
 TEMPLATE = app
 
@@ -16,9 +17,6 @@ TEMPLATE = app
 SOURCES += main.cc \
     glwindow.cc \
     raywindow.cc
-
-
-QMAKE_CXXFLAGS += -std=c++11
 
 HEADERS += \
     glwindow.hh \
