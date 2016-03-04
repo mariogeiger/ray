@@ -1,5 +1,6 @@
 #include "raywindow.hh"
 #include <QFile>
+#include <iostream>
 
 RayWindow::RayWindow()
   : m_track(false)
@@ -38,6 +39,10 @@ void RayWindow::setTrack(bool track)
 void RayWindow::initializeGL()
 {
   OpenGL.initializeOpenGLFunctions();
+  std::cout << OpenGL.glGetString(GL_VERSION) << std::endl;
+  std::cout << OpenGL.glGetString(GL_VENDOR) << std::endl;
+  std::cout << OpenGL.glGetString(GL_RENDERER) << std::endl;
+  std::cout << OpenGL.glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
 
   QByteArray code;
   {

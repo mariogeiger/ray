@@ -6,6 +6,7 @@
 #include <QOpenGLTexture>
 #include <QMatrix4x4>
 #include <QOpenGLFunctions_2_0>
+#include <QOpenGLFunctions_3_0>
 #include <QTime>
 #include <QQuaternion>
 
@@ -18,7 +19,7 @@ public:
   void setTrack(bool track);
 
 protected:
-  QOpenGLFunctions_2_0 OpenGL;
+  QOpenGLFunctions_3_0 OpenGL;
 
   void initializeGL();
   void paintGL();
