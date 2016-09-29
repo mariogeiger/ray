@@ -24,3 +24,5 @@ HEADERS += \
 
 RESOURCES += \
     resource.qrc
+
+DISTFILES +=

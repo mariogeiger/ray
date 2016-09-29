@@ -1,6 +1,7 @@
 #include "raywindow.hh"
 #include <QFile>
 #include <iostream>
+#include <cmath>
 
 RayWindow::RayWindow()
   : m_track(false)
@@ -44,21 +45,9 @@ void RayWindow::initializeGL()
   std::cout << OpenGL.glGetString(GL_RENDERER) << std::endl;
   std::cout << OpenGL.glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
 
-  QByteArray code;
-  {
-    QFile f(":/glsl.frag");
-    f.open(QIODevice::ReadOnly);
-    code = f.readAll();
-  }
-  {
-    QFile f(":/multi.frag");
-    f.open(QIODevice::ReadOnly);
-    code.replace("#include MAIN", f.readAll());
-  }
-
   m_p = new QOpenGLShaderProgram(this);
   m_p->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/glsl.vert");
-  m_p->addShaderFromSourceCode(QOpenGLShader::Fragment, code);
+  m_p->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/glsl.frag");
   m_p->bindAttributeLocation("vertex", 0);
   m_p->link();
 
@@ -79,9 +68,9 @@ void RayWindow::initializeGL()
   // rouge
   m_p->setUniformValue("spheres[1].center", -1.5, 2.0, -5.5);
   m_p->setUniformValue("spheres[1].radius", 1.0f);
-  m_p->setUniformValue("spheres[1].mat.phong_factor", 1.0f);
-  m_p->setUniformValue("spheres[1].mat.ambiant", 0.5, 0.0, 0.0);
-  m_p->setUniformValue("spheres[1].mat.diffuse", 1.0, 0.0, 0.0);
+  m_p->setUniformValue("spheres[1].mat.phong_factor", 0.8f);
+  m_p->setUniformValue("spheres[1].mat.ambiant", 0.5, 0.0, 0.1);
+  m_p->setUniformValue("spheres[1].mat.diffuse", 1.0, 0.0, 0.2);
   m_p->setUniformValue("spheres[1].mat.eta", 0.0f);
 
   // transparente
@@ -99,6 +88,14 @@ void RayWindow::initializeGL()
   m_p->setUniformValue("spheres[3].mat.ambiant", 0.0, 0.0, 0.0);
   m_p->setUniformValue("spheres[3].mat.diffuse", 0.0, 0.0, 0.0);
   m_p->setUniformValue("spheres[3].mat.eta", 1.f/1.5f);
+
+  // miroir
+  m_p->setUniformValue("spheres[4].center", 2.5, -1.5, -20);
+  m_p->setUniformValue("spheres[4].radius", 2.0f);
+  m_p->setUniformValue("spheres[4].mat.phong_factor", 0.0f);
+  m_p->setUniformValue("spheres[4].mat.ambiant", 0.0, 0.0, 0.0);
+  m_p->setUniformValue("spheres[4].mat.diffuse", 0.0, 0.0, 0.0);
+  m_p->setUniformValue("spheres[4].mat.eta", 0.0f);
 
   // cube
   GLfloat etacube = 0.9f;
@@ -246,7 +243,7 @@ void RayWindow::mouseMoveEvent(QMouseEvent* ev)
     QPointF d = ev->windowPos() - middle;
 
     if (!d.isNull()) {
-      m_rot *= QQuaternion::fromAxisAndAngle(d.y(), d.x(), 0, -0.05 * std::min(std::pow(d.manhattanLength(), 2.0), 10.0));
+	  m_rot *= QQuaternion::fromAxisAndAngle(d.y(), d.x(), 0, -0.15 * std::min(std::pow(d.manhattanLength(), 2.0), 10.0));
       cursor().setPos(mapToGlobal(middle));
     }
   }
